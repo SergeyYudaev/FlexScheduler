@@ -1,3 +1,3 @@
 # Scheduler
 
-[Шедулер для сервисов](scheduler/src/docs/asciisoc/index.adoc)
+[Шедулер для сервисов](src/docs/asciisoc/index.adoc)
