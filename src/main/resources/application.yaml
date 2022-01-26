@@ -1,0 +1,44 @@
+server:
+  port: 8092
+
+spring:
+  application:
+    name: FlexScheduler
+  kafka:
+    enabled: true
+    bootstrap-servers: localhost:9092
+    topic:
+      # Имя топика kafka для сервиса шедулера.
+      name: syudaev-flex-scheduler
+      # Количество партиций в топике.
+      partitions: 2
+      # Фактор репликации.
+      replicas: 1
+
+application:
+  # Способ инициализации шедулеров. Доступные значения: yaml
+  scheduler-initialisation-type: yaml
+  # Время от старта приложения до инициализации шедулеров.
+  initial-scheduler-delay: 1000
+  # Размер пула threadPoolTaskScheduler.
+  thread-pool-size: 10
+  # Список шедулеров. Шедулеры из списка автоматически инициализируются при старте приложения.
+  #  Параметры:
+  #   - command имя шедулера. Отправляется во внешний сервис для запуска джобы.
+  #   - enabled: признак включения/отключения шедулера.
+  #   - fixedDelay/cron - параметры шедулера.
+  # ВАЖНО: Шедулеры типов fixedDelay и cron должны вноситься в списки fixedDelaySchedulers, cronSchedulers
+  # соответственно. Разделитель в списке - символ "-".
+  schedulers:
+    # Шедулеры с параметром fixedDelay (мс.).
+    fixedDelaySchedulers:
+      - # Пример.
+        command: FIXED_DELAY_SCHEDULER
+        enabled: true
+        fixedDelay: 10000
+    # Шедулеры с параметром cron.
+    cronSchedulers:
+      - # Пример
+        command: CRON_SCHEDULER
+        enabled: true
+        cron: 0/5 * * * * ?
