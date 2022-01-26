@@ -1,4 +1,4 @@
-package ru.syudaev.flexscheduler.configuration;
+package ru.syudaev.flexscheduler.configuration.kafka;
 
 import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.springframework.beans.factory.annotation.Value;

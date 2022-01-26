@@ -1,6 +1,6 @@
 package ru.syudaev.flexscheduler.producer;
 
-import ru.syudaev.dto.SchedulerCommand;
+import ru.syudaev.kafkadto.SchedulerCommand;
 
 /**
  * Сервис, отправляющий сообщения о запуске джобы во внешнем сервисе.

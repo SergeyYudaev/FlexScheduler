@@ -1,4 +1,4 @@
-package ru.syudaev.flexscheduler.configuration;
+package ru.syudaev.flexscheduler.configuration.kafka;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -12,7 +12,8 @@ import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
-import ru.syudaev.dto.SchedulerCommand;
+import ru.syudaev.kafkadto.SchedulerCommand;
+import ru.syudaev.flexscheduler.listener.MockKafkaSchedulerListener;
 
 import java.util.HashMap;
 
@@ -46,7 +47,7 @@ public class KafkaConsumerConfig {
         properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ErrorHandlingDeserializer.class);
         properties.put(ErrorHandlingDeserializer.KEY_DESERIALIZER_CLASS, StringDeserializer.class);
         properties.put(ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS, JsonDeserializer.class);
-        properties.put(JsonDeserializer.VALUE_DEFAULT_TYPE, "ru.syudaev.dto.SchedulerCommand");
+        properties.put(JsonDeserializer.VALUE_DEFAULT_TYPE, "ru.syudaev.kafkadto.SchedulerCommand");
         return new DefaultKafkaConsumerFactory<>(properties);
     }
 
@@ -64,6 +65,32 @@ public class KafkaConsumerConfig {
         factory.setRecordFilterStrategy(consumerRecord ->
                 consumerRecord.value() == null
                         || consumerRecord.value().getCommandType().equals(SchedulerCommand.CommandType.EXECUTE_EXTERNAL_JOB)
+        );
+        return factory;
+    }
+
+    /**
+     * Конфиг для имитатора внешнего сервиса (см. {@link MockKafkaSchedulerListener})
+     *
+     * @return ConcurrentKafkaListenerContainerFactory - фабрика, создающая контейнеры для методов,
+     *         аннотированных {@literal @}KafkaListener.
+     */
+    @Bean("mockSchedulerListenerContainerFactory")
+    public ConcurrentKafkaListenerContainerFactory<String, SchedulerCommand> mockSchedulerListenerContainerFactory() {
+        var properties = new HashMap<>(commonProperties.getConfigurationProperties());
+        properties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, EARLIEST);
+        properties.put(ConsumerConfig.GROUP_ID_CONFIG, "externalService");
+        properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, ErrorHandlingDeserializer.class);
+        properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ErrorHandlingDeserializer.class);
+        properties.put(ErrorHandlingDeserializer.KEY_DESERIALIZER_CLASS, StringDeserializer.class);
+        properties.put(ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS, JsonDeserializer.class);
+        properties.put(JsonDeserializer.VALUE_DEFAULT_TYPE, "ru.syudaev.kafkadto.SchedulerCommand");
+
+        var factory = new ConcurrentKafkaListenerContainerFactory<String, SchedulerCommand>();
+        factory.setConsumerFactory(new DefaultKafkaConsumerFactory<>(properties));
+        factory.setRecordFilterStrategy(consumerRecord ->
+                consumerRecord.value() == null
+                        || consumerRecord.value().getCommandType().equals(SchedulerCommand.CommandType.UNLOCK_SCHEDULER)
         );
         return factory;
     }

@@ -1,4 +1,4 @@
-package ru.syudaev.dto;
+package ru.syudaev.kafkadto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
@@ -20,16 +20,21 @@ public class SchedulerCommand {
     @JsonProperty(value = "commandType")
     private CommandType commandType;
 
+    @JsonProperty(value = "lockable")
+    private Boolean lockable;
+
     @JsonProperty(value = "payload")
     private Map<String, String> payload;
 
     /**
-     * Конструктор для исходящей команды шедулера, несцщей только тип шедулера в payload.
+     * Конструктор для исходящей команды шедулера, несущей только команду шедулера и признак блокировки в payload.
      *
      * @param schedulerCommand Команда шедулера.
+     * @param lockable Признак блокировки шедулера (надо ли ждать исполнения внешней джобы).
      */
-    public SchedulerCommand(String schedulerCommand) {
+    public SchedulerCommand(String schedulerCommand, boolean lockable) {
         this.commandType = CommandType.EXECUTE_EXTERNAL_JOB;
+        this.lockable = lockable;
         this.payload = new HashMap<>();
         payload.put(PayloadKeys.TYPE.toLowerCase(), schedulerCommand);
     }

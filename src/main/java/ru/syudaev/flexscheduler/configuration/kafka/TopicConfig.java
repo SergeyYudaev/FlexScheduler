@@ -1,4 +1,4 @@
-package ru.syudaev.flexscheduler.configuration;
+package ru.syudaev.flexscheduler.configuration.kafka;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.kafka.clients.admin.NewTopic;

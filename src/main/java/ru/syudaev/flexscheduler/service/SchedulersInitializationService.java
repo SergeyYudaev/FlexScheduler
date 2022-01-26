@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import ru.syudaev.flexscheduler.entity.enums.SchedulerType;
 import ru.syudaev.flexscheduler.producer.SchedulerMessageSender;
-import ru.syudaev.dto.SchedulerCommand;
+import ru.syudaev.kafkadto.SchedulerCommand;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
@@ -74,14 +74,14 @@ public class SchedulersInitializationService {
                 .forEach(sc -> {
                     CronTrigger trigger = new CronTrigger(sc.getSchedulerParameter());
                     this.scheduler.schedule(
-                            () -> sender.send(new SchedulerCommand(sc.getCommand())),
+                            () -> sender.send(new SchedulerCommand(sc.getCommand(), false)),
                             trigger);
                 });
     }
 
     private void doFixedDelaySchedulerJob(Scheduler scheduler) {
         if (schedulerConditionService.isEnabled(scheduler.getCommand())) {
-            sender.send(new SchedulerCommand(scheduler.getCommand()));
+            sender.send(new SchedulerCommand(scheduler.getCommand(), true));
             schedulerConditionService.lockScheduler(scheduler.getCommand());
         }
     }

@@ -1,13 +1,13 @@
 package ru.syudaev.flexscheduler.producer;
 
 import lombok.extern.slf4j.Slf4j;
-import ru.syudaev.kafkadto.SchedulerCommand;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Component;
 import org.springframework.util.concurrent.ListenableFutureCallback;
+import ru.syudaev.kafkadto.SchedulerCommand;
 
 /**
  * Отправщик сообщений, использует kafka.
@@ -15,12 +15,12 @@ import org.springframework.util.concurrent.ListenableFutureCallback;
 @Slf4j
 @Component
 @ConditionalOnProperty(value = "spring.kafka.enabled", havingValue = "true")
-public class KafkaSchedulerMessageSenderImpl implements SchedulerMessageSender {
+public class MockKafkaSchedulerMessageSender {
 
     private final String topicName;
     private final KafkaTemplate<String, SchedulerCommand> kafkaTemplate;
 
-    public KafkaSchedulerMessageSenderImpl(@Value("${spring.kafka.topic.name}") String topicName,
+    public MockKafkaSchedulerMessageSender(@Value("${spring.kafka.topic.name}") String topicName,
                                            KafkaTemplate<String, SchedulerCommand> kafkaTemplate) {
         this.topicName = topicName;
         this.kafkaTemplate = kafkaTemplate;
@@ -31,7 +31,6 @@ public class KafkaSchedulerMessageSenderImpl implements SchedulerMessageSender {
      *
      * @param dto Полезная нагрузка сообщения. Cм. {@link SchedulerCommand}.
      */
-    @Override
     public void send(SchedulerCommand dto) {
         var type = dto.getPayload().get(SchedulerCommand.PayloadKeys.TYPE.toLowerCase());
         var future = kafkaTemplate.send(topicName, type, dto);
@@ -43,7 +42,7 @@ public class KafkaSchedulerMessageSenderImpl implements SchedulerMessageSender {
 
             @Override
             public void onSuccess(SendResult<String, SchedulerCommand> stringDataSendResult) {
-                log.info("Sent Message = {} with offset = {}", dto, stringDataSendResult.getRecordMetadata().offset());
+                log.warn("Имитатор внешнего сервиса отвечает: {} with offset = {}", dto, stringDataSendResult.getRecordMetadata().offset());
             }
         });
     }
